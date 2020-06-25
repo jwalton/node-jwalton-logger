@@ -1,6 +1,8 @@
 import express from 'express';
-import log from './winston';
-import makeRequestLoggerMiddleware from './requestLoggerMiddleware';
+import makeRequestLoggerMiddleware from './logging/requestLoggerMiddleware';
+import { getLoggerFromFilename } from './logging';
+
+const log = getLoggerFromFilename(__filename);
 
 const PORT = 3000;
 

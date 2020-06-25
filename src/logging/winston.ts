@@ -6,14 +6,32 @@ import esFormat from './format/esFormat';
 import requestFormat from './format/requestFormat';
 import prefixFormat from './format/prefixFormat';
 
+export const LEVELS: { [key: string]: number } = {
+    error: 0,
+    warn: 1,
+    info: 2,
+    debug: 3,
+};
+
+const COLORS: { [key: string]: string | string[] } = {
+    error: 'red',
+    warn: 'yellow',
+    info: 'green',
+    debug: 'cyan',
+};
+
+winston.addColors(COLORS);
+
 const logger = winston.createLogger({
     transports: [
         new winston.transports.Console({
             format: winston.format.combine(
-                requestFormat({ debug: true }),
+                requestFormat({ debug: true, colors: true }),
                 prefixFormat(),
                 winston.format.colorize({ message: true }),
                 debugFormat({
+                    levels: LEVELS,
+                    colors: COLORS,
                     colorizeMessage: false, // Already colored by `winston.format.colorize`.
                 })
             ),

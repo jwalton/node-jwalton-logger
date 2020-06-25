@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as http from 'http';
 import onFinished from 'on-finished';
-import { Logger } from 'winston';
+import Logger from './Logger';
 
 /**
  * Create a middleware that logs all requests.
@@ -43,19 +43,13 @@ export default function makeRequestLoggerMiddleware(
                     (res as any).responseTime = Date.now() - start;
                 }
 
-                log.log({
-                    level: 'info',
-                    message: '',
+                log.info({
                     request: req,
                     response: res,
                     tags: ['http'],
                 });
             } catch (err) {
-                log.log({
-                    level: 'error',
-                    message: 'Error logging request',
-                    err,
-                });
+                log.error({ err }, 'Error logging request');
             }
         });
 

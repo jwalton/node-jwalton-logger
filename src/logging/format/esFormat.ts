@@ -1,6 +1,7 @@
 import * as http from 'http';
 import _ from 'lodash';
 import os from 'os';
+import { SanitizedLogInfo } from '../LogInfo';
 
 const HOSTNAME = os.hostname();
 
@@ -24,22 +25,26 @@ interface EsInfo {
         responseTime: number;
         fullHeaders: string;
     };
+    src?: {
+        file: string;
+    };
 }
 
 /**
  * Format messages before sending them to elasticsearch.
  */
 export class EsFormat {
-    transform(info: any): any {
+    transform(info: SanitizedLogInfo): any {
         const result: EsInfo = {
             '@timestamp': info['@timestamp'] || new Date().toISOString(),
             host: HOSTNAME,
             message: info.message || '',
             pid: process.pid,
             tags: info.tags,
-            err: info.err ? info.err.stack() : undefined,
+            err: info.err ? info.err.stack : undefined,
             level: info.level,
             name: info.name,
+            src: info.src,
         };
 
         const { request, response } = info;
