@@ -10,6 +10,38 @@ export interface RequestFormatOptions {
     useColors: boolean;
 }
 
+/**
+ * Takes an info with a `request` (and optionally a `response`) and merges them
+ * together into a single `request` string.
+ *
+ * If `debug` is true (because this is being used in a console formatter) then
+ * the `request` and `response` objects will be removed from the `info` object,
+ * so we don't dump a bunch of noise to the console.
+ */
+const requestFormat: logform.FormatWrap = format(
+    (info: logform.TransformableInfo, options: RequestFormatOptions) => {
+        if (info.request) {
+            const { request, response } = info;
+
+            if (options.debug) {
+                info.request = undefined;
+                info.response = undefined;
+            }
+
+            const reqString = requestToString(request, response, options.useColors);
+
+            // If there's no message, then replace the message with the request
+            if (!info.message) {
+                info.message = reqString;
+            } else if (options.debug) {
+                info.request = reqString;
+            }
+        }
+
+        return info;
+    }
+);
+
 export function requestToString(
     req: http.IncomingMessage,
     res: http.ServerResponse | undefined,
@@ -46,33 +78,5 @@ export function requestToString(
     fields = fields.filter((f) => !!f);
     return fields.join(' ');
 }
-
-/**
- * Takes an info with a `req` (and optionally a `res`) and merges them together
- * into a single `req` string.
- */
-const requestFormat: logform.FormatWrap = format(
-    (info: logform.TransformableInfo, options: RequestFormatOptions) => {
-        if (info.request) {
-            const { request, response } = info;
-
-            if (options.debug) {
-                info.request = undefined;
-                info.response = undefined;
-            }
-
-            const reqString = requestToString(request, response, options.useColors);
-
-            // If there's no message, then replace the message with the request
-            if (!info.message) {
-                info.message = reqString;
-            } else if (options.debug) {
-                info.request = reqString;
-            }
-        }
-
-        return info;
-    }
-);
 
 export default requestFormat;
